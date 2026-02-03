@@ -3,62 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>전기 실무 계산기 Pro</title>
-    <!-- Tailwind CSS CDN -->
+    <title>전기 실무 계산기 Pro v3.13</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM CDN -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .transition-all { transition: all 0.2s ease-in-out; }
     </style>
 </head>
 <body class="bg-[#f8fafc]">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
-        // 아이콘 컴포넌트 래퍼 (Lucide 대응)
-        const Icon = ({ name, size = 22, className = "" }) => {
-            useEffect(() => {
-                lucide.createIcons();
-            }, [name]);
-            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        const Icon = ({ name, size = 20, className = "" }) => {
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
         };
 
-        const Card = ({ title, iconName, children, result, resultLabel = "판정 결과", unit = "", subResult, formula, colorClass="text-blue-600", bgClass="bg-blue-50" }) => (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-full hover:shadow-md transition-all duration-300">
+        const Card = ({ title, iconName, children, result, resultLabel = "판정 결과", unit = "", subResult, formula, colorClass="text-blue-600", bgClass="bg-blue-50", dualResult, multiExtraInfo }) => (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-full hover:shadow-md transition-all">
                 <div className="flex items-center gap-3 mb-5 text-slate-700">
-                    <div className={`p-2.5 ${bgClass} ${colorClass} rounded-xl shadow-sm flex items-center justify-center`}>
-                        <Icon name={iconName} size={22} />
+                    <div className={`p-2 ${bgClass} ${colorClass} rounded-xl shadow-sm flex items-center justify-center`}>
+                        <Icon name={iconName} size={20} />
                     </div>
-                    <h3 className="font-bold text-lg tracking-tight leading-tight">{title}</h3>
+                    <h3 className="font-bold text-base tracking-tight leading-tight">{title}</h3>
                 </div>
-                <div className="flex-grow space-y-4">
-                    {children}
-                </div>
+                <div className="flex-grow space-y-4">{children}</div>
                 <div className="mt-6 pt-5 border-t border-slate-100">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{resultLabel}</div>
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className={`text-3xl font-black tracking-tighter ${colorClass}`}>
-                            {result}
-                        </span>
-                        <span className="text-sm font-bold text-slate-400">{unit}</span>
-                    </div>
-                    {formula && (
-                        <div className="text-[10px] font-mono text-slate-400 mt-1 italic">
-                            Formula: {formula}
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{resultLabel}</div>
+                    {dualResult ? (
+                        <div className="grid grid-cols-1 gap-2">
+                            {dualResult.map((res, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                    <span className="text-[10px] font-bold text-slate-500 pl-1">{res.label}</span>
+                                    <div className="flex items-baseline gap-1 pr-1">
+                                        <span className={`text-lg font-black tracking-tighter ${colorClass}`}>{res.value}</span>
+                                        <span className="text-[10px] font-bold text-slate-400">{unit}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                            <span className={`text-2xl font-black tracking-tighter ${colorClass}`}>{result}</span>
+                            <span className="text-sm font-bold text-slate-400">{unit}</span>
                         </div>
                     )}
+                    {multiExtraInfo && (
+                        <div className="grid grid-cols-2 gap-2 mt-3">
+                            {multiExtraInfo.map((info, idx) => (
+                                <div key={idx} className={`p-2 rounded-xl border flex flex-col items-center justify-center ${info.bgColor} ${info.textColor} transition-all`}>
+                                     <div className="text-[8px] font-bold uppercase tracking-wider opacity-70">{info.label}</div>
+                                     <div className="text-base font-black tracking-tighter leading-tight">{info.value}</div>
+                                     <div className="text-[8px] font-bold uppercase tracking-tighter text-center leading-none">{info.status}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {formula && <div className="text-[9px] font-mono text-slate-400 mt-3 italic leading-tight">공식: {formula}</div>}
                     {subResult && (
-                        <div className="mt-3 text-[12px] leading-relaxed text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-start gap-2">
-                            <Icon name="info" size={14} className="mt-0.5 flex-shrink-0 text-slate-400" />
+                        <div className="mt-3 text-[11px] leading-relaxed text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-start gap-1.5 font-medium">
+                            <Icon name="info" size={12} className="mt-0.5 flex-shrink-0 text-slate-400" />
                             <span>{subResult}</span>
                         </div>
                     )}
@@ -68,220 +80,177 @@
 
         const InputGroup = ({ label, value, onChange, placeholder, unit, step = "1", type="number" }) => (
             <div className="w-full">
-                <label className="block text-[11px] font-bold text-slate-500 mb-1.5 ml-1 uppercase tracking-wider">{label}</label>
-                <div className="relative group">
+                <label className="block text-[10px] font-bold text-slate-500 mb-1 ml-0.5 uppercase tracking-wider">{label}</label>
+                <div className="relative">
                     <input
                         type={type}
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         step={step}
-                        className="block w-full rounded-xl border-slate-200 bg-slate-50 border-2 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-sm font-semibold p-3 pr-12 transition-all outline-none"
+                        className="block w-full rounded-xl border-slate-200 bg-slate-50 border-2 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 text-sm font-semibold p-2 pr-10 transition-all outline-none"
                         placeholder={placeholder}
                     />
-                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                        <span className="text-slate-400 font-bold text-[10px]">{unit}</span>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <span className="text-slate-400 font-bold text-[9px]">{unit}</span>
                     </div>
                 </div>
             </div>
         );
 
-        const PhaseSelector = ({ phase, setPhase, label1 = "단상", label3 = "3상" }) => (
-            <div className="flex bg-slate-100 p-1.5 rounded-xl mb-4">
-                <button onClick={() => setPhase(1)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${phase === 1 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>{label1}</button>
-                <button onClick={() => setPhase(3)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${phase === 3 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>{label3}</button>
-            </div>
-        );
-
-        const UnitSelector = ({ unit, setUnit }) => (
-            <div className="flex bg-slate-100 p-1.5 rounded-xl mb-4 w-full">
-                <button onClick={() => setUnit('kW')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${unit === 'kW' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500'}`}>kW</button>
-                <button onClick={() => setUnit('HP')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${unit === 'HP' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500'}`}>HP</button>
+        const ToggleSelector = ({ value, onChange, options }) => (
+            <div className="flex bg-slate-100 p-1 rounded-xl w-full">
+                {options.map((opt) => (
+                    <button
+                        key={opt.val}
+                        onClick={() => onChange(opt.val)}
+                        className={`flex-1 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                            value === opt.val ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'
+                        }`}
+                    >
+                        {opt.label}
+                    </button>
+                ))}
             </div>
         );
 
         function App() {
             // States
-            const [motorPhase, setMotorPhase] = useState(3);
-            const [motorUnit, setMotorUnit] = useState('kW');
-            const [motorCap, setMotorCap] = useState(15);
-            const [motorV, setMotorV] = useState(380);
-            const [motorEff, setMotorEff] = useState(0.9);
-            const [motorPf, setMotorPf] = useState(0.85);
-
-            const [powerPhase, setPowerPhase] = useState(1);
-            const [powerV, setPowerV] = useState(220);
-            const [powerI, setPowerI] = useState(15);
-            const [powerIR, setPowerIR] = useState(10);
-            const [powerIS, setPowerIS] = useState(20);
-            const [powerIT, setPowerIT] = useState(30);
-
-            const [currPhase, setCurrPhase] = useState(1);
-            const [currP, setCurrP] = useState(3300);
-            const [currV, setCurrV] = useState(220);
-
-            const [ubR, setUbR] = useState(10);
-            const [ubS, setUbS] = useState(20);
-            const [ubT, setUbT] = useState(30);
-
-            const [leakSupply, setLeakSupply] = useState(50);
-            const [leakMeasured, setLeakMeasured] = useState(0.1);
-
-            const [pfLoad, setPfLoad] = useState(100);
-            const [pfBefore, setPfBefore] = useState(0.8);
-            const [pfAfter, setPfAfter] = useState(0.95);
-
             const [trCap, setTrCap] = useState(500);
-            const [trV, setTrV] = useState(6600);
+            const [trV1, setTrV1] = useState(22900);
+            const [trV2, setTrV2] = useState(380);
+            const [diagSide, setDiagSide] = useState('secondary');
+            const [trR, setTrR] = useState(100);
+            const [trS, setTrS] = useState(110);
+            const [trT, setTrT] = useState(105);
+
+            const [pPhase, setPPhase] = useState(3);
+            const [pV, setPV] = useState(220);
+            const [pI, setPI] = useState(10);
+            const [pIR, setPIR] = useState(10);
+            const [pIS, setPIS] = useState(12);
+            const [pIT, setPIT] = useState(11);
+
+            const [iPhase, setIPhase] = useState(3);
+            const [iP, setIP] = useState(15000);
+            const [iV, setIV] = useState(380);
+
+            const [ubR, setUbR] = useState(100);
+            const [ubS, setUbS] = useState(120);
+            const [ubT, setUbT] = useState(110);
+
+            const [mUnit, setMUnit] = useState('kW');
+            const [mCap, setMCap] = useState(15);
+            const [mV, setMV] = useState(380);
+            const [mEff, setMEff] = useState(0.9);
+            const [mPf, setMPf] = useState(0.85);
+
+            const [lkSupply, setLkSupply] = useState(50);
+            const [lkMeasured, setLkMeasured] = useState(0.5);
+
+            const [qcP, setQcP] = useState(100);
+            const [qcBefore, setQcBefore] = useState(0.8);
+            const [qcAfter, setQcAfter] = useState(0.95);
 
             // Calculations
-            const motorCurrent = () => {
-                let watts = motorCap * 1000;
-                if (motorUnit === 'HP') watts = motorCap * 745.7;
-                const den = motorPhase === 3 ? Math.sqrt(3) * motorV * motorEff * motorPf : motorV * motorEff * motorPf;
-                return (watts / den).toFixed(2);
+            const calcTrI = (v) => {
+                const vol = parseFloat(v);
+                if (!vol || vol <= 0) return 0;
+                return (parseFloat(trCap) * 1000) / (Math.sqrt(3) * vol);
             };
 
-            const unbalance = () => {
-                const avg = (parseFloat(ubR) + parseFloat(ubS) + parseFloat(ubT)) / 3;
-                if (avg === 0) return "0.0";
-                const maxDiff = Math.max(Math.abs(ubR - avg), Math.abs(ubS - avg), Math.abs(ubT - avg));
-                return ((maxDiff / avg) * 100).toFixed(1);
-            };
+            const trDiagnostics = useMemo(() => {
+                const r = parseFloat(trR) || 0, s = parseFloat(trS) || 0, t = parseFloat(trT) || 0;
+                const rated = diagSide === 'primary' ? calcTrI(trV1) : calcTrI(trV2);
+                const avg = (r + s + t) / 3;
+                const loadUsage = rated > 0 ? (avg / rated) * 100 : 0;
+                const maxDiff = avg > 0 ? Math.max(Math.abs(r - avg), Math.abs(s - avg), Math.abs(t - avg)) : 0;
+                const ubRatio = avg > 0 ? (maxDiff / avg) * 100 : 0;
+                return [
+                    { label: `부하율`, value: loadUsage.toFixed(1) + "%", status: loadUsage >= 100 ? "⚠️ 위험" : loadUsage >= 80 ? "💡 주의" : "✅ 여유", bgColor: loadUsage >= 100 ? "bg-red-50" : loadUsage >= 80 ? "bg-amber-50" : "bg-emerald-50", textColor: loadUsage >= 100 ? "text-red-600" : loadUsage >= 80 ? "text-amber-600" : "text-emerald-600" },
+                    { label: `불평형률`, value: ubRatio.toFixed(1) + "%", status: ubRatio > 30 ? "⚠️ 불량" : "✅ 적정", bgColor: ubRatio > 30 ? "bg-red-50" : "bg-blue-50", textColor: ubRatio > 30 ? "text-red-600" : "text-blue-600" }
+                ];
+            }, [trCap, trV1, trV2, diagSide, trR, trS, trT]);
+
+            const motorCurrent = useMemo(() => {
+                let watts = parseFloat(mCap) * 1000;
+                if (mUnit === 'HP') watts = parseFloat(mCap) * 745.7;
+                const den = Math.sqrt(3) * parseFloat(mV) * parseFloat(mEff) * parseFloat(mPf);
+                return den > 0 ? (watts / den).toFixed(2) : "0.00";
+            }, [mUnit, mCap, mV, mEff, mPf]);
 
             return (
-                <div className="max-w-7xl mx-auto p-4 md:p-8">
-                    <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-8">
+                <div className="max-w-7xl mx-auto p-4 md:p-6">
+                    <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-6">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-3 border border-blue-100">
-                                Electrical Tools Pro
-                            </div>
-                            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
-                                <Icon name="calculator" size={30} className="text-blue-600" />
-                                전기 실무 계산기 <span className="text-blue-600">Pro</span>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest mb-2 border border-blue-100">Electrical Asset Pro</div>
+                            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2 tracking-tight">
+                                <Icon name="calculator" size={26} className="text-blue-600" /> 전기 실무 계산기 <span className="text-blue-600">Pro</span>
                             </h1>
                         </div>
-                        <div className="mt-4 md:mt-0 text-right font-bold text-[10px] text-slate-400 uppercase tracking-widest">
-                            GITHUB DEPLOY VERSION 3.2
-                        </div>
+                        <div className="mt-4 md:mt-0 text-right font-bold text-[10px] text-slate-400 tracking-widest uppercase tracking-tighter">VERSION 3.13</div>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <Card 
-                            title="모터 정격전류 (정밀)" iconName="settings" 
-                            result={motorCurrent()} unit="A" formula={motorPhase === 3 ? "P / (√3 * V * η * cosΘ)" : "P / (V * η * cosΘ)"}
-                            colorClass="text-emerald-600" bgClass="bg-emerald-50"
-                        >
-                            <PhaseSelector phase={motorPhase} setPhase={setMotorPhase} />
-                            <UnitSelector unit={motorUnit} setUnit={setMotorUnit} />
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputGroup label="용량" value={motorCap} onChange={setMotorCap} unit={motorUnit} />
-                                <InputGroup label="전압" value={motorV} onChange={setMotorV} unit="V" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        {/* 1. 변압기 & 차단기 통합 진단 */}
+                        <Card title="변압기 & 차단기 통합 진단" iconName="disc" unit="A" resultLabel="변압기 정격 전류" formula="S / (√3 * V)" colorClass="text-purple-600" bgClass="bg-purple-50"
+                            dualResult={[{ label: "1차 정격 (VCB측)", value: calcTrI(trV1).toFixed(1) }, { label: "2차 정격 (ACB측)", value: calcTrI(trV2).toFixed(1) }]}
+                            multiExtraInfo={trDiagnostics}>
+                            <div className="grid grid-cols-2 gap-2">
+                                <InputGroup label="변압기 용량" value={trCap} onChange={setTrCap} unit="kVA" />
+                                <div className="space-y-1.5"><InputGroup label="1차 전압" value={trV1} onChange={setTrV1} unit="V" /><InputGroup label="2차 전압" value={trV2} onChange={setTrV2} unit="V" /></div>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputGroup label="효율" value={motorEff} onChange={setMotorEff} unit="η" step="0.01" />
-                                <InputGroup label="역률" value={motorPf} onChange={setMotorPf} unit="cos" step="0.01" />
-                            </div>
-                        </Card>
-
-                        <Card 
-                            title="전력 계산 (P)" iconName="zap" 
-                            result={powerPhase === 1 ? (powerV * powerI).toLocaleString() : (powerV * (parseFloat(powerIR)+parseFloat(powerIS)+parseFloat(powerIT))).toLocaleString()} 
-                            unit="W" formula={powerPhase === 1 ? "V * I" : "V_phase * ΣI_phase"}
-                        >
-                            <PhaseSelector phase={powerPhase} setPhase={setPowerPhase} label3="3상 4선식" />
-                            {powerPhase === 1 ? (
-                                <div className="grid grid-cols-2 gap-3">
-                                    <InputGroup label="전압" value={powerV} onChange={setPowerV} unit="V" />
-                                    <InputGroup label="전류" value={powerI} onChange={setPowerI} unit="A" />
+                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
+                                <ToggleSelector value={diagSide} onChange={setDiagSide} options={[{label:'VCB (1차)', val:'primary'}, {label:'ACB (2차)', val:'secondary'}]} />
+                                <div className="grid grid-cols-3 gap-1.5">
+                                    <InputGroup label="R상" value={trR} onChange={setTrR} unit="A" />
+                                    <InputGroup label="S상" value={trS} onChange={setTrS} unit="A" />
+                                    <InputGroup label="T상" value={trT} onChange={setTrT} unit="A" />
                                 </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <InputGroup label="상전압" value={powerV} onChange={setPowerV} unit="V" />
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <InputGroup label="R상" value={powerIR} onChange={setPowerIR} unit="A" />
-                                        <InputGroup label="S상" value={powerIS} onChange={setPowerIS} unit="A" />
-                                        <InputGroup label="T상" value={powerIT} onChange={setPowerIT} unit="A" />
-                                    </div>
-                                </div>
-                            )}
-                        </Card>
-
-                        <Card 
-                            title="부하 전류 (I)" iconName="activity" 
-                            result={currPhase === 1 ? (currP / currV).toFixed(2) : (currP / (Math.sqrt(3) * currV)).toFixed(2)} 
-                            unit="A" formula={currPhase === 1 ? "P / V" : "P / (√3 * V)"}
-                            colorClass="text-indigo-600" bgClass="bg-indigo-50"
-                        >
-                            <PhaseSelector phase={currPhase} setPhase={setCurrPhase} />
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputGroup label="전력" value={currP} onChange={setCurrP} unit="W" />
-                                <InputGroup label="전압" value={currV} onChange={setCurrV} unit="V" />
                             </div>
                         </Card>
 
-                        <Card 
-                            title="3상 불평형률" iconName="scale" 
-                            result={unbalance()} unit="%" formula="(MaxDiff / Avg) * 100"
-                            subResult={unbalance() > 30 ? "⚠️ 불량 (상 평형 조정 필요)" : "✅ 양호 (30% 이하)"}
-                            colorClass={unbalance() > 30 ? "text-red-600" : "text-blue-600"}
-                            bgClass={unbalance() > 30 ? "bg-red-50" : "bg-blue-50"}
-                        >
-                            <div className="grid grid-cols-3 gap-2">
-                                <InputGroup label="R (A)" value={ubR} onChange={setUbR} unit="A" />
-                                <InputGroup label="S (A)" value={ubS} onChange={setUbS} unit="A" />
-                                <InputGroup label="T (A)" value={ubT} onChange={setUbT} unit="A" />
-                            </div>
+                        {/* 2. 전력 계산 (P) */}
+                        <Card title="전력 계산 (P)" iconName="zap" result={pPhase === 1 ? (parseFloat(pV) * parseFloat(pI)).toLocaleString() : (parseFloat(pV) * (parseFloat(pIR)+parseFloat(pIS)+parseFloat(pIT))).toLocaleString()} unit="W" formula={pPhase === 1 ? "V * I" : "V_phase * ΣI_phase"}>
+                            <ToggleSelector value={pPhase} onChange={setPPhase} options={[{label:'단상', val:1}, {label:'3상 4선식', val:3}]} />
+                            {pPhase === 1 ? <div className="grid grid-cols-2 gap-2"><InputGroup label="전압" value={pV} onChange={setPV} unit="V" /><InputGroup label="전류" value={pI} onChange={setPI} unit="A" /></div> :
+                            <div className="space-y-2"><InputGroup label="상전압" value={pV} onChange={setPV} unit="V" /><div className="grid grid-cols-3 gap-1.5"><InputGroup label="R상" value={pIR} onChange={setPIR} unit="A" /><InputGroup label="S상" value={pIS} onChange={setPIS} unit="A" /><InputGroup label="T상" value={pIT} onChange={setPIT} unit="A" /></div></div>}
                         </Card>
 
-                        <Card 
-                            title="누설전류 판정" iconName="shield-alert" 
-                            result={leakMeasured <= (leakSupply/2000*1000) ? "적합" : "부적합"}
-                            formula="I_rated / 2000"
-                            subResult={`KEC 기준 한계: ${(leakSupply/2000*1000).toFixed(2)} mA`}
-                            colorClass={leakMeasured <= (leakSupply/2000*1000) ? "text-blue-600" : "text-red-600"}
-                            bgClass={leakMeasured <= (leakSupply/2000*1000) ? "bg-blue-50" : "bg-red-50"}
-                        >
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputGroup label="정격전류" value={leakSupply} onChange={setLeakSupply} unit="A" />
-                                <InputGroup label="측정누설" value={leakMeasured} onChange={setLeakMeasured} unit="mA" step="0.01" />
-                            </div>
+                        {/* 3. 부하 전류 (I) */}
+                        <Card title="부하 전류 (I)" iconName="activity" result={iPhase === 1 ? (parseFloat(iP) / parseFloat(iV) || 0).toFixed(2) : (parseFloat(iP) / (Math.sqrt(3) * parseFloat(iV)) || 0).toFixed(2)} unit="A" formula={iPhase === 1 ? "P / V" : "P / (√3 * V)"} colorClass="text-indigo-600" bgClass="bg-indigo-50">
+                            <ToggleSelector value={iPhase} onChange={setIPhase} options={[{label:'단상', val:1}, {label:'3상', val:3}]} />
+                            <div className="grid grid-cols-2 gap-2"><InputGroup label="전력" value={iP} onChange={setIP} unit="W" /><InputGroup label="전압" value={iV} onChange={setIV} unit="V" /></div>
                         </Card>
 
-                        <Card 
-                            title="콘덴서 용량" iconName="battery-charging" 
-                            result={(pfLoad * (Math.sqrt(1/(pfBefore*pfBefore)-1) - Math.sqrt(1/(pfAfter*pfAfter)-1))).toFixed(2)} 
-                            unit="kVAR" formula="P * (tanΘ1 - tanΘ2)"
-                            colorClass="text-cyan-600" bgClass="bg-cyan-50"
-                        >
-                            <InputGroup label="유효전력" value={pfLoad} onChange={setPfLoad} unit="kW" />
-                            <div className="grid grid-cols-2 gap-3">
-                                <InputGroup label="현재역률" value={pfBefore} onChange={setPfBefore} unit="cos" step="0.01" />
-                                <InputGroup label="목표역률" value={pfAfter} onChange={setPfAfter} unit="cos" step="0.01" />
-                            </div>
+                        {/* 4. 누설전류 판정 (이동됨) */}
+                        <Card title="누설전류 판정" iconName="shield-alert" result={parseFloat(lkMeasured) <= (parseFloat(lkSupply)/2000*1000) ? "✅ 적합" : "⚠️ 부적합"} resultLabel="KEC 판정" formula="I_rated / 2000" colorClass={parseFloat(lkMeasured) <= (parseFloat(lkSupply)/2000*1000) ? "text-blue-600" : "text-red-600"} bgClass={parseFloat(lkMeasured) <= (parseFloat(lkSupply)/2000*1000) ? "bg-blue-50" : "bg-red-50"}>
+                            <div className="grid grid-cols-2 gap-2"><InputGroup label="차단기 정격" value={lkSupply} onChange={setLkSupply} unit="A" /><InputGroup label="측정 누설" value={lkMeasured} onChange={setLkMeasured} unit="mA" step="0.01" /></div>
                         </Card>
 
-                        <Card 
-                            title="변압기 정격" iconName="disc" 
-                            result={trV > 0 ? ((trCap * 1000) / (Math.sqrt(3) * trV)).toFixed(2) : 0} 
-                            unit="A" formula="S / (√3 * V)"
-                            colorClass="text-purple-600" bgClass="bg-purple-50"
-                        >
-                            <div className="grid grid-cols-1 gap-3">
-                                <InputGroup label="용량" value={trCap} onChange={setTrCap} unit="kVA" />
-                                <InputGroup label="전압" value={trV} onChange={setTrV} unit="V" />
-                            </div>
+                        {/* 5. 3상 불평형률 (부하) */}
+                        <Card title="3상 불평형률 (부하)" iconName="scale" result={(Math.max(Math.abs(parseFloat(ubR)-((parseFloat(ubR)+parseFloat(ubS)+parseFloat(ubT))/3)), Math.abs(parseFloat(ubS)-((parseFloat(ubR)+parseFloat(ubS)+parseFloat(ubT))/3)), Math.abs(parseFloat(ubT)-((parseFloat(ubR)+parseFloat(ubS)+parseFloat(ubT))/3))) / ((parseFloat(ubR)+parseFloat(ubS)+parseFloat(ubT))/3) * 100 || 0).toFixed(1)} unit="%" formula="(Max_Dev / Avg) * 100">
+                            <div className="grid grid-cols-3 gap-1.5"><InputGroup label="R상" value={ubR} onChange={setUbR} unit="A" /><InputGroup label="S상" value={ubS} onChange={setUbS} unit="A" /><InputGroup label="T상" value={ubT} onChange={setUbT} unit="A" /></div>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">* KEC: 불평형률 30% 이내 권고</p>
+                        </Card>
+
+                        {/* 6. 모터 정격전류 (정밀) */}
+                        <Card title="모터 정격전류 (정밀)" iconName="settings" result={motorCurrent} unit="A" resultLabel="전부하 전류 (FLC)" formula="P / (√3*V*η*cosΘ)" colorClass="text-emerald-600" bgClass="bg-emerald-50">
+                            <ToggleSelector value={mUnit} onChange={setMUnit} options={[{label:'kW', val:'kW'}, {label:'HP', val:'HP'}]} />
+                            <div className="grid grid-cols-2 gap-2"><InputGroup label="용량" value={mCap} onChange={setMCap} unit={mUnit} /><InputGroup label="전압" value={mV} onChange={setMV} unit="V" /></div>
+                            <div className="grid grid-cols-2 gap-2"><InputGroup label="효율(η)" value={mEff} onChange={setMEff} unit="0~1" step="0.01" /><InputGroup label="역률(PF)" value={mPf} onChange={setMPf} unit="cos" step="0.01" /></div>
+                        </Card>
+
+                        {/* 7. 콘덴서 용량 */}
+                        <Card title="콘덴서 용량" iconName="battery-charging" result={(parseFloat(qcP) * (Math.sqrt(1/Math.pow(parseFloat(qcBefore),2)-1) - Math.sqrt(1/Math.pow(parseFloat(qcAfter),2)-1)) || 0).toFixed(2)} unit="kVAR" formula="P * (tanΘ1 - tanΘ2)" colorClass="text-cyan-600" bgClass="bg-cyan-50">
+                            <InputGroup label="유효전력" value={qcP} onChange={setQcP} unit="kW" />
+                            <div className="grid grid-cols-2 gap-2"><InputGroup label="현재역률" value={qcBefore} onChange={setQcBefore} unit="cos" step="0.01" /><InputGroup label="목표역률" value={qcAfter} onChange={setQcAfter} unit="cos" step="0.01" /></div>
                         </Card>
                     </div>
-                    
-                    <footer className="mt-16 text-center text-slate-400 text-[10px] pb-12 border-t border-slate-200 pt-10">
-                        <p>본 계산기는 교육 및 참고용이며, 실제 시공 시 KEC 법규를 반드시 재확인하십시오.</p>
-                    </footer>
+                    <footer className="mt-12 text-center text-slate-400 text-[10px] pb-10 border-t border-slate-200 pt-8 uppercase font-bold tracking-widest opacity-60">Engineered for Safe Maintenance</footer>
                 </div>
             );
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
