@@ -147,7 +147,7 @@
                     {dualResult ? (
                         <div className="grid grid-cols-1 gap-2.5">
                             {dualResult.map((res, idx) => (
-                                <div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                                <div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/20">
                                     <span className="text-[11px] font-medium text-slate-400">{res.label}</span>
                                     <div className="flex items-baseline gap-1">
                                         <span className={`text-xl font-bold numeric-font ${colorClass} glow-text-primary`}>{res.value}</span>
@@ -166,7 +166,7 @@
                     {multiExtraInfo && (
                         <div className="grid grid-cols-2 gap-2.5 mt-4">
                             {multiExtraInfo.map((info, idx) => (
-                                <div key={idx} className={`p-3 rounded-xl border flex flex-col items-center justify-center ${info.bgColor} ${info.textColor} ${info.borderColor || 'border-transparent'} transition-all shadow-inner`}>
+                                <div key={idx} className={`p-3 rounded-xl border flex flex-col items-center justify-center ${info.bgColor} ${info.textColor} ${info.borderColor || 'border-white/10'} transition-all shadow-inner`}>
                                      <div className="text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">{info.label}</div>
                                      <div className="text-lg font-black numeric-font tracking-tighter leading-none">{info.value}</div>
                                      <div className="text-[9px] font-bold uppercase tracking-tighter mt-1.5 opacity-80">{info.status}</div>
@@ -189,10 +189,10 @@
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         step={step}
-                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-10 transition-all outline-none text-slate-100 input-glow"
+                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-8 transition-all outline-none text-slate-100 input-glow"
                         placeholder={placeholder}
                     />
-                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 right-0 pr-1.5 flex items-center pointer-events-none">
                         <span className="text-slate-500 font-black text-[9px] uppercase tracking-tighter">{unit}</span>
                     </div>
                 </div>
@@ -311,7 +311,7 @@
                                 </h1>
                                 <div className="flex items-center gap-2">
                                     <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono opacity-80">v3.13 精密 診斷</span>
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono opacity-80 text-white">V3.13</span>
                                 </div>
                             </div>
                         </div>
@@ -449,7 +449,7 @@
                                     <div className="bg-slate-900/80 p-4 rounded-[1.5rem] border border-white/10 space-y-4 shadow-inner">
                                         <div className="text-[9px] font-bold text-slate-400 uppercase text-center tracking-[0.3em] font-mono leading-none">상별 부하 실시간 진단 (A)</div>
                                         <ToggleSelector value={diagSide} onChange={setDiagSide} options={[{label:'고압 (1차측)', val:'primary'}, {label:'저압 (2차측)', val:'secondary'}]} />
-                                        <div className="grid grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-3 gap-2">
                                             <InputGroup label="R상" value={trR} onChange={setTrR} unit="A" />
                                             <InputGroup label="S상" value={trS} onChange={setTrS} unit="A" />
                                             <InputGroup label="T상" value={trT} onChange={setTrT} unit="A" />
