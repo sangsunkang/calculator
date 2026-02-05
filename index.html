@@ -166,7 +166,7 @@
                     {multiExtraInfo && (
                         <div className="grid grid-cols-2 gap-2.5 mt-4">
                             {multiExtraInfo.map((info, idx) => (
-                                <div key={idx} className={`p-3 rounded-xl border flex flex-col items-center justify-center ${info.bgColor} ${info.textColor} border-transparent transition-all shadow-inner`}>
+                                <div key={idx} className={`p-3 rounded-xl border flex flex-col items-center justify-center ${info.bgColor} ${info.textColor} ${info.borderColor || 'border-transparent'} transition-all shadow-inner`}>
                                      <div className="text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">{info.label}</div>
                                      <div className="text-lg font-black numeric-font tracking-tighter leading-none">{info.value}</div>
                                      <div className="text-[9px] font-bold uppercase tracking-tighter mt-1.5 opacity-80">{info.status}</div>
@@ -189,7 +189,7 @@
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         step={step}
-                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-8 transition-all outline-none text-slate-100 input-glow"
+                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-10 transition-all outline-none text-slate-100 input-glow"
                         placeholder={placeholder}
                     />
                     <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
@@ -289,8 +289,8 @@
                 const maxDiff = avg > 0 ? Math.max(Math.abs(r - avg), Math.abs(s - avg), Math.abs(t - avg)) : 0;
                 const ubRatio = avg > 0 ? (maxDiff / avg) * 100 : 0;
                 return [
-                    { label: `부하율`, value: loadUsage.toFixed(1) + "%", status: loadUsage >= 100 ? "위험" : loadUsage >= 80 ? "주의" : "양호", bgColor: loadUsage >= 100 ? "bg-rose-500/10" : loadUsage >= 80 ? "bg-amber-500/10" : "bg-emerald-500/10", textColor: loadUsage >= 100 ? "text-rose-400" : loadUsage >= 80 ? "text-amber-400" : "text-emerald-400" },
-                    { label: `불평형률`, value: ubRatio.toFixed(1) + "%", status: ubRatio > 30 ? "불량" : "적정", bgColor: ubRatio > 30 ? "bg-rose-500/10" : "bg-sky-500/10", textColor: ubRatio > 30 ? "text-rose-400" : "text-sky-400" }
+                    { label: `부하율`, value: loadUsage.toFixed(1) + "%", status: loadUsage >= 100 ? "위험" : loadUsage >= 80 ? "주의" : "양호", bgColor: loadUsage >= 100 ? "bg-rose-500/20" : loadUsage >= 80 ? "bg-amber-500/20" : "bg-emerald-500/20", textColor: loadUsage >= 100 ? "text-rose-400" : loadUsage >= 80 ? "text-amber-400" : "text-emerald-400", borderColor: loadUsage >= 100 ? "border-rose-500/30" : loadUsage >= 80 ? "border-amber-500/30" : "border-emerald-500/30" },
+                    { label: `불평형률`, value: ubRatio.toFixed(1) + "%", status: ubRatio > 30 ? "불량" : "적정", bgColor: ubRatio > 30 ? "bg-rose-500/20" : "bg-sky-500/20", textColor: ubRatio > 30 ? "text-rose-400" : "text-sky-400", borderColor: ubRatio > 30 ? "border-rose-500/30" : "border-sky-500/30" }
                 ];
             }, [trCap, trV1, trV2, diagSide, trR, trS, trT]);
 
@@ -316,7 +316,7 @@
                             </div>
                         </div>
                         
-                        <div className="flex flex-col items-end opacity-60 font-mono">
+                        <div className="flex flex-col items-end opacity-60 font-mono text-right">
                             <span className="text-[7px] font-black text-slate-500 uppercase tracking-[0.3em] mb-0.5">적용 기준</span>
                             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">KEC 2024 표준</span>
                         </div>
@@ -434,8 +434,8 @@
                                 resultLabel="변압기 정격 용량 기준 분석" 
                                 dualResult={[{ label: "고압측 (VCB) 정격", value: calcTrI(trV1).toFixed(2) }, { label: "저압측 (ACB) 정격", value: calcTrI(trV2).toFixed(2) }]} 
                                 multiExtraInfo={trDiagnostics} 
-                                colorClass="text-slate-200" 
-                                bgClass="bg-white/10"
+                                colorClass="text-white glow-text-primary" 
+                                bgClass="bg-sky-500/20"
                                 formula="용량 ÷ (루트3 × 전압)"
                             >
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -446,8 +446,8 @@
                                             <InputGroup label="2차측(저압) 전압" value={trV2} onChange={setTrV2} unit="V" />
                                         </div>
                                     </div>
-                                    <div className="bg-slate-900/60 p-4 rounded-[1.5rem] border border-white/10 space-y-4 shadow-inner">
-                                        <div className="text-[9px] font-black text-slate-500 uppercase text-center tracking-[0.3em] font-mono leading-none">상별 부하 실시간 진단 (A)</div>
+                                    <div className="bg-slate-900/80 p-4 rounded-[1.5rem] border border-white/10 space-y-4 shadow-inner">
+                                        <div className="text-[9px] font-bold text-slate-400 uppercase text-center tracking-[0.3em] font-mono leading-none">상별 부하 실시간 진단 (A)</div>
                                         <ToggleSelector value={diagSide} onChange={setDiagSide} options={[{label:'고압 (1차측)', val:'primary'}, {label:'저압 (2차측)', val:'secondary'}]} />
                                         <div className="grid grid-cols-3 gap-3">
                                             <InputGroup label="R상" value={trR} onChange={setTrR} unit="A" />
