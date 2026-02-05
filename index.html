@@ -189,11 +189,11 @@
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         step={step}
-                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-14 transition-all outline-none text-slate-100 input-glow"
+                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-8 transition-all outline-none text-slate-100 input-glow"
                         placeholder={placeholder}
                     />
-                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                        <span className="text-slate-500 font-black text-[10px] uppercase">{unit}</span>
+                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                        <span className="text-slate-500 font-black text-[9px] uppercase tracking-tighter">{unit}</span>
                     </div>
                 </div>
             </div>
@@ -388,7 +388,7 @@
                             bgClass="bg-amber-500/10"
                             formula="(최대편차 ÷ 평균) × 100"
                         >
-                            <div className="grid grid-cols-3 gap-2"><InputGroup label="R상 전류" value={ubR} onChange={setUbR} unit="A" /><InputGroup label="S상 전류" value={ubS} onChange={setUbS} unit="A" /><InputGroup label="T상 전류" value={ubT} onChange={setUbT} unit="A" /></div>
+                            <div className="grid grid-cols-3 gap-2"><InputGroup label="R상" value={ubR} onChange={setUbR} unit="A" /><InputGroup label="S상" value={ubS} onChange={setUbS} unit="A" /><InputGroup label="T상" value={ubT} onChange={setUbT} unit="A" /></div>
                             <div className="text-[10px] text-slate-500 font-bold bg-slate-900/50 p-3 rounded-xl border border-white/5 text-center leading-tight">저압 30% 이내 유지</div>
                         </Card>
 
