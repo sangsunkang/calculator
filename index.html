@@ -42,10 +42,7 @@
 
         .input-glow:focus {
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
-        }
-
-        .gauge-track {
-            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(56, 189, 248, 0.5) !important;
         }
 
         .safety-line {
@@ -64,7 +61,7 @@
 
         .numeric-font {
             font-family: 'Inter', 'Pretendard', monospace;
-            letter-spacing: -0.05em;
+            letter-spacing: -0.02em;
         }
 
         .glow-text-primary {
@@ -139,7 +136,7 @@
                         </div>
                         <h3 className="font-bold text-slate-200 text-base tracking-tight">{title}</h3>
                     </div>
-                    {formula && <div className="text-[9px] font-mono text-slate-500 bg-white/5 px-2 py-1 rounded-md border border-white/5 whitespace-nowrap ml-2">{formula}</div>}
+                    {formula && <div className="text-[10px] font-bold text-slate-400 bg-white/10 px-2 py-1 rounded-md border border-white/10 whitespace-nowrap ml-2 shadow-sm font-sans">{formula}</div>}
                 </div>
                 
                 <div className="flex-grow space-y-4">{children}</div>
@@ -185,25 +182,25 @@
 
         const InputGroup = ({ label, value, onChange, placeholder, unit, step = "1", type="number" }) => (
             <div className="w-full">
-                <label className="block text-[10px] font-bold text-slate-500 mb-1.5 ml-1 uppercase tracking-widest">{label}</label>
+                <label className="block text-[10px] font-black text-slate-400 mb-1.5 ml-1 uppercase tracking-widest">{label}</label>
                 <div className="relative group">
                     <input
                         type={type}
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         step={step}
-                        className="block w-full rounded-xl border-white/5 bg-white/5 border focus:bg-white/10 focus:border-sky-500/50 focus:ring-4 focus:ring-sky-500/10 text-sm font-semibold p-2.5 pr-12 transition-all outline-none text-slate-200 input-glow"
+                        className="block w-full rounded-xl border-white/20 bg-slate-900 focus:bg-slate-800 border focus:ring-4 focus:ring-sky-500/10 text-sm font-bold p-3 pr-14 transition-all outline-none text-slate-100 input-glow"
                         placeholder={placeholder}
                     />
                     <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                        <span className="text-slate-600 font-bold text-[10px] uppercase">{unit}</span>
+                        <span className="text-slate-500 font-black text-[10px] uppercase">{unit}</span>
                     </div>
                 </div>
             </div>
         );
 
         const ToggleSelector = ({ value, onChange, options }) => (
-            <div className="flex bg-white/5 p-1 rounded-xl w-full border border-white/5 shadow-inner">
+            <div className="flex bg-slate-900 p-1 rounded-xl w-full border border-white/10 shadow-inner">
                 {options.map((opt) => (
                     <button
                         key={opt.val}
@@ -319,7 +316,7 @@
                             </div>
                         </div>
                         
-                        <div className="flex flex-col items-end opacity-60">
+                        <div className="flex flex-col items-end opacity-60 font-mono">
                             <span className="text-[7px] font-black text-slate-500 uppercase tracking-[0.3em] mb-0.5">적용 기준</span>
                             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">KEC 2024 표준</span>
                         </div>
@@ -338,12 +335,12 @@
                             subResult={<LoadGauge percentage={loadRate} />} 
                             colorClass="text-sky-400" 
                             bgClass="bg-sky-500/10"
-                            formula={pPhase === 1 ? "P = V·I" : "P = Vp·ΣIp"}
+                            formula={pPhase === 1 ? "전압 × 전류" : "상전압 × 전류합계"}
                         >
                             <ToggleSelector value={pPhase} onChange={setPPhase} options={[{label:'단상 (1Φ)', val:1}, {label:'3상 4선 (3Φ)', val:3}]} />
                             <div className="grid grid-cols-2 gap-3">
                                 <InputGroup label="차단기 정격" value={pBreaker} onChange={setPBreaker} unit="A" />
-                                <InputGroup label={pPhase === 1 ? "사용 전압" : "상전압 (V)"} value={pV} onChange={setPV} unit="V" />
+                                <InputGroup label={pPhase === 1 ? "사용 전압" : "상전압 (220V)"} value={pV} onChange={setPV} unit="V" />
                             </div>
                             {pPhase === 1 ? <InputGroup label="부하 전류" value={pI} onChange={setPI} unit="A" /> :
                             <div className="grid grid-cols-3 gap-2"><InputGroup label="R상 전류" value={pIR} onChange={setPIR} unit="A" /><InputGroup label="S상 전류" value={pIS} onChange={setPIS} unit="A" /><InputGroup label="T상 전류" value={pIT} onChange={setPIT} unit="A" /></div>}
@@ -356,7 +353,7 @@
                             result={(iPhase === 1 ? (parseFloat(iP) / (parseFloat(iV)||1)) : (parseFloat(iP) / (Math.sqrt(3) * (parseFloat(iV)||1)))).toFixed(2)} 
                             unit="A" 
                             resultLabel="계산된 부하 전류" 
-                            formula={iPhase === 1 ? "I = P/V" : "I = P/(√3·V)"} 
+                            formula={iPhase === 1 ? "전력 ÷ 전압" : "전력 ÷ (루트3 × 전압)"} 
                             colorClass="text-indigo-400" 
                             bgClass="bg-indigo-50/10"
                         >
@@ -372,11 +369,11 @@
                             resultLabel="KEC 규정 준수 여부" 
                             colorClass={parseFloat(lkMeasured) <= (parseFloat(lkSupply)/2000*1000) ? "text-emerald-400" : "text-rose-400"} 
                             bgClass={parseFloat(lkMeasured) <= (parseFloat(lkSupply)/2000*1000) ? "bg-emerald-500/10" : "bg-rose-500/10"}
-                            formula="I_L ≤ I_r/2000"
+                            formula="누설 ≤ 정격 ÷ 2000"
                         >
                             <div className="grid grid-cols-2 gap-3"><InputGroup label="차단기 정격" value={lkSupply} onChange={setLkSupply} unit="A" /><InputGroup label="실측 누설치" value={lkMeasured} onChange={setLkMeasured} unit="mA" step="0.01" /></div>
-                            <div className="text-[10px] text-slate-500 font-bold bg-white/5 p-3 rounded-xl border border-white/5 uppercase tracking-tighter text-center leading-tight">
-                                허용 한계치: {(parseFloat(lkSupply)/2).toFixed(2)}mA 이하
+                            <div className="text-[10px] text-slate-500 font-bold bg-slate-900/50 p-3 rounded-xl border border-white/5 uppercase tracking-tighter text-center leading-tight">
+                                허용 한계: {(parseFloat(lkSupply)/2).toFixed(2)}mA 이하
                             </div>
                         </Card>
 
@@ -389,10 +386,10 @@
                             resultLabel="상별 불평형률" 
                             colorClass="text-amber-400" 
                             bgClass="bg-amber-500/10"
-                            formula="(Max_dev/Avg)×100"
+                            formula="(최대편차 ÷ 평균) × 100"
                         >
                             <div className="grid grid-cols-3 gap-2"><InputGroup label="R상 전류" value={ubR} onChange={setUbR} unit="A" /><InputGroup label="S상 전류" value={ubS} onChange={setUbS} unit="A" /><InputGroup label="T상 전류" value={ubT} onChange={setUbT} unit="A" /></div>
-                            <div className="text-[10px] text-slate-500 font-bold bg-white/5 p-3 rounded-xl border border-white/5 text-center leading-tight">저압 30% 이내 유지</div>
+                            <div className="text-[10px] text-slate-500 font-bold bg-slate-900/50 p-3 rounded-xl border border-white/5 text-center leading-tight">저압 30% 이내 유지</div>
                         </Card>
 
                         {/* 5. 모터 정격전류 정밀계산 */}
@@ -404,14 +401,14 @@
                             resultLabel="전부하 전류 (FLC)" 
                             colorClass="text-cyan-400" 
                             bgClass="bg-cyan-500/10"
-                            formula="P/(√3·V·η·cosθ)"
+                            formula="전력 ÷ (루트3·전압·효율·역률)"
                         >
                             <div className="grid grid-cols-2 gap-2">
                                 <ToggleSelector value={motorPhase} onChange={setMotorPhase} options={[{label:'단상', val:1}, {label:'삼상', val:3}]} />
                                 <ToggleSelector value={mUnit} onChange={setMUnit} options={[{label:'kW', val:'kW'}, {label:'HP(마력)', val:'HP'}]} />
                             </div>
                             <div className="grid grid-cols-2 gap-3"><InputGroup label="모터 용량" value={mCap} onChange={setMCap} unit={mUnit} /><InputGroup label="사용 전압" value={mV} onChange={setMV} unit="V" /></div>
-                            <div className="grid grid-cols-2 gap-3"><InputGroup label="효율 (η)" value={mEff} onChange={setMEff} unit="0~1" step="0.01" /><InputGroup label="역률 (cosΘ)" value={mPf} onChange={setMPf} unit="0~1" step="0.01" /></div>
+                            <div className="grid grid-cols-2 gap-3"><InputGroup label="효율 (η)" value={mEff} onChange={setMEff} unit="0~1" step="0.01" /><InputGroup label="역률 (cos)" value={mPf} onChange={setMPf} unit="0~1" step="0.01" /></div>
                         </Card>
 
                         {/* 6. 콘덴서 용량 산정 */}
@@ -423,7 +420,7 @@
                             resultLabel="필요 콘덴서 용량" 
                             colorClass="text-violet-400" 
                             bgClass="bg-violet-500/10"
-                            formula="P(tanθ₁-tanθ₂)"
+                            formula="전력 × (개선전tan - 개선후tan)"
                         >
                             <InputGroup label="부하 유효전력" value={qcP} onChange={setQcP} unit="kW" />
                             <div className="grid grid-cols-2 gap-3"><InputGroup label="현재 역률" value={qcBefore} onChange={setQcBefore} unit="cos" step="0.01" /><InputGroup label="목표 역률" value={qcAfter} onChange={setQcAfter} unit="cos" step="0.01" /></div>
@@ -439,18 +436,18 @@
                                 multiExtraInfo={trDiagnostics} 
                                 colorClass="text-slate-200" 
                                 bgClass="bg-white/10"
-                                formula="S/(√3·V)"
+                                formula="용량 ÷ (루트3 × 전압)"
                             >
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     <div className="space-y-4">
                                         <InputGroup label="변압기 정격 용량" value={trCap} onChange={setTrCap} unit="kVA" />
                                         <div className="grid grid-cols-2 gap-4">
-                                            <InputGroup label="1차 전압" value={trV1} onChange={setTrV1} unit="V" />
-                                            <InputGroup label="2차 전압" value={trV2} onChange={setTrV2} unit="V" />
+                                            <InputGroup label="1차측(고압) 전압" value={trV1} onChange={setTrV1} unit="V" />
+                                            <InputGroup label="2차측(저압) 전압" value={trV2} onChange={setTrV2} unit="V" />
                                         </div>
                                     </div>
-                                    <div className="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 space-y-4 shadow-inner">
-                                        <div className="text-[9px] font-bold text-slate-500 uppercase text-center tracking-[0.3em] font-mono leading-none">상별 부하 실시간 진단</div>
+                                    <div className="bg-slate-900/60 p-4 rounded-[1.5rem] border border-white/10 space-y-4 shadow-inner">
+                                        <div className="text-[9px] font-black text-slate-500 uppercase text-center tracking-[0.3em] font-mono leading-none">상별 부하 실시간 진단 (A)</div>
                                         <ToggleSelector value={diagSide} onChange={setDiagSide} options={[{label:'고압 (1차측)', val:'primary'}, {label:'저압 (2차측)', val:'secondary'}]} />
                                         <div className="grid grid-cols-3 gap-3">
                                             <InputGroup label="R상" value={trR} onChange={setTrR} unit="A" />
